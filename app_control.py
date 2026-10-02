@@ -487,13 +487,17 @@ T = TEXTS[st.session_state.language]
 if "public_mode" not in st.session_state:
     st.session_state.public_mode = False
 
-# Current user role: "admin" or "public"
+# Current user role: "admin", "public", or None
 if "active_role" not in st.session_state:
-    st.session_state.active_role = None   # None = not logged in yet
+    st.session_state.active_role = None
 
 # Whether the admin is currently authenticated
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
+
+# End date of the test (editable by admin)
+if "test_end_dt" not in st.session_state:
+    st.session_state.test_end_dt = DEFAULT_END_DATE
 
 
 # ============================================================
@@ -1288,30 +1292,8 @@ def plot_error_ai_vs_real(df):
 
 
 # ============================================================
-# --- MAIN UI ---
+# --- SIDEBAR (ALWAYS RENDERED FIRST) ---
 # ============================================================
-# If no role is active yet (not authenticated, not public), show a welcome /
-# locked message and stop before rendering any sensitive content.
-if st.session_state.active_role is None:
-    st.title(T["main_title"])
-    st.info(T["no_access_message"])
-    st.stop()
-
-# Title depends on the visitor's role
-if st.session_state.active_role == "admin":
-    st.title(T["main_title"])
-elif st.session_state.active_role == "public":
-    st.title(T["main_title_public"])
-    st.info(T["public_mode_notice"])
-
-# Load data from local CSV
-df = load_live_data()
-
-# Initialise end date in session_state
-if "test_end_dt" not in st.session_state:
-    st.session_state.test_end_dt = DEFAULT_END_DATE
-
-# Sidebar
 with st.sidebar:
     # Language selector
     lang_options = {"en": "English", "ca": "Català"}
@@ -1345,7 +1327,6 @@ with st.sidebar:
 
     # --- Handle selection ---
     if selected_user == T["user_admin"]:
-        # If not yet authenticated, ask for the password
         if not st.session_state.admin_authenticated:
             pw_input = st.text_input(T["password_label"], type="password", key="pwd_admin_input")
             if pw_input:
@@ -1356,14 +1337,11 @@ with st.sidebar:
                     st.rerun()
                 else:
                     st.error(T["password_ko"])
-            # Do not set active_role yet; keep it as None
             st.session_state.active_role = None
         else:
-            # Already authenticated as admin
             st.session_state.active_role = "admin"
             st.success(T["role_admin"])
     else:
-        # Public user
         st.session_state.active_role = "public"
         st.session_state.admin_authenticated = False
         st.info(T["role_public"])
@@ -1377,7 +1355,6 @@ with st.sidebar:
         st.markdown("---")
         st.subheader("🔧 Admin controls")
 
-        # Public mode toggle
         public_toggle = st.checkbox(
             T["public_mode_toggle"],
             value=st.session_state.public_mode,
@@ -1391,7 +1368,6 @@ with st.sidebar:
         if st.session_state.public_mode:
             st.caption(T["public_mode_active"])
 
-        # Log out
         if st.button(T["logout_button"], use_container_width=True):
             st.session_state.admin_authenticated = False
             st.session_state.active_role = None
@@ -1403,8 +1379,9 @@ with st.sidebar:
     st.subheader(T["test_control_header"])
 
     # Start date (auto, read-only, from CSV)
-    if df is not None and not df.empty and 'Date' in df.columns:
-        start_dt = pd.to_datetime(df['Date']).min()
+    df_sidebar = load_live_data()
+    if df_sidebar is not None and not df_sidebar.empty and 'Date' in df_sidebar.columns:
+        start_dt = pd.to_datetime(df_sidebar['Date']).min()
     else:
         start_dt = None
 
@@ -1456,10 +1433,30 @@ with st.sidebar:
 
 
 # ============================================================
+# --- ACCESS GATE (AFTER SIDEBAR, BEFORE MAIN CONTENT) ---
+# ============================================================
+if st.session_state.active_role is None:
+    st.title(T["main_title"])
+    st.info(T["no_access_message"])
+    st.stop()
+
+
+# ============================================================
+# --- MAIN UI ---
+# ============================================================
+if st.session_state.active_role == "admin":
+    st.title(T["main_title"])
+elif st.session_state.active_role == "public":
+    st.title(T["main_title_public"])
+    st.info(T["public_mode_notice"])
+
+# Load data from local CSV
+df = load_live_data()
+
+
+# ============================================================
 # --- DATA PROCESSING AND TABS ---
 # ============================================================
-# At this point, active_role is guaranteed to be "admin" or "public".
-
 if df is not None and not df.empty:
     df['Date'] = pd.to_datetime(df['Date'])
     effective_start = df['Date'].min()
