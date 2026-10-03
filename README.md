@@ -63,15 +63,23 @@ The main research question is:
 5. **Identify the type of content** (themes) that is hardest to distinguish.
 6. **Provide an open, reproducible tool** that other researchers can reuse.
 
-### Hypothesis
+### Main hypothesis
 
-We hypothesise that:
+Due to recent advances in artificial intelligence, people are currently
+unable to reliably distinguish AI-generated audiovisual content from real
+content. This low discrimination capacity leads to a high risk of social
+manipulation.
 
-- Younger participants have a *slight* advantage, but not as much as commonly
-  assumed.
-- Exposure to social media **does not** automatically improve detection.
-- AI-generated images in themes like *"famous people"* and *"wars/conflicts"*
-  are harder to detect than *"animals"* or *"vintage photographs"*.
+### Secondary hypotheses
+
+- **Age:** Younger participants are expected to show only a slight
+  advantage, if any, over older participants. 
+- **AI exposure:** Frequent social media usage and high exposure to
+  audiovisual content do **not** automatically improve detection ability.
+- **Content type:** AI-generated images that include human figures —
+  especially famous people, influencers and social-media-style content —
+  are expected to be **easier** for humans to detect than images of
+  natural disasters, wars, conflicts or vintage photographs.  
 
 ---
 
