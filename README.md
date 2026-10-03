@@ -100,6 +100,8 @@ AICI = ((accuracy% - 50) × 2) / 10
 The dashboard displays this both as a numerical value and as an aesthetic
 semicircular gauge.
 
+![AICI Index visualization](docs/screenshots/aici.jpeg)
+
 ---
 
 ## PROJECT STRUCTURE
